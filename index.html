@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="es" data-type="software" data-radius="soft" data-ground="sand" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>centralBV: app de gestión para cuarteles de bomberos</title>
+<meta name="description" content="centralBV genera las constancias de actuación en PDF y lleva el estado de cada móvil de emergencia. Los inspectores revisan desde el celular.">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="icon" href="assets/brand/isotipo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<style>
+:root {
+  --p-bg: #1b1a18; --p-surface: #252422; --p-ink: #ede8e3; --p-muted: #a39a92;
+  --p-accent: #c8281e; --p-accent-ink: #ffffff; --p-action: #c8281e; --p-action-ink: #ffffff;
+  --p-inv-bg: #ede8e3; --p-inv-surface: #dcd8d3; --p-inv-ink: #1b1a18; --p-inv-muted: #5c5a57;
+  --p-inv-accent: #c8281e; --p-inv-accent-ink: #ffffff; --p-inv-action: #c8281e; --p-inv-action-ink: #ffffff;
+  --font-display: "Inter", system-ui, sans-serif;
+  --font-text: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: -0.028em;
+  --display-tracking-xl: -0.036em;
+  --display-stretch: 96%;
+  --ly-scale: 1.04;
+}
+</style>
+<link rel="stylesheet" href="assets/ui/base.css">
+<link rel="stylesheet" href="assets/ui/window/fragment.css">
+<link rel="stylesheet" href="assets/ui/checklist/fragment.css">
+<link rel="stylesheet" href="assets/ui/doc/fragment.css">
+<link rel="stylesheet" href="assets/ui/notify/fragment.css">
+<link rel="stylesheet" href="assets/ui/toggles/fragment.css">
+<link rel="stylesheet" href="assets/ui/search/fragment.css">
+<link rel="stylesheet" href="assets/diagrams/diagram.css">
+<script src="assets/backgrounds/backgrounds.js"></script>
+<style>
+  /* the app's own state colours (centralBV tokens: estado ok, aviso, peligro, info) */
+  .a-chip { --c: #5fd3a0; --b: #0f3b2c; justify-self: end; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 99px; font-size: 13px; font-weight: 500; color: var(--c); background: var(--b); box-shadow: inset 0 0 0 1px var(--c); white-space: nowrap; }
+  .a-chip svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .a-chip--warn { --c: #f2b84b; --b: #4a3208; }
+  .a-chip--danger { --c: #ff8a8a; --b: #5a1a22; }
+  .a-chip--info { --c: #6cb8f0; --b: #12365a; }
+
+  /* hero: the real dashboard (centralBV front: DashboardPage, ContadorEstado, TarjetaMovil, EstadoMovilBadge, Alert) */
+  .hero__art { --cy: 10s; background:
+      radial-gradient(70% 60% at 18% 12%, color-mix(in oklab, var(--ground-surface) 80%, white), transparent 70%),
+      radial-gradient(60% 50% at 90% 100%, color-mix(in oklab, var(--ground-bg) 80%, var(--ground-accent)), transparent 70%),
+      var(--ground-bg); }
+  .hero__art > .ly-piece--note { left: var(--s-6); bottom: var(--s-6); width: 320px; z-index: 2; }
+  .hero__proof { font-size: var(--t-small); color: var(--muted); }
+  .hero__art { --st-ok: #5fd3a0; --st-ok-bg: #0f3b2c; --st-warn: #f2b84b; --st-warn-bg: #4a3208; --st-danger: #ff8a8a; --st-danger-bg: #5a1a22; --st-info: #6cb8f0; --st-info-bg: #12365a; }
+  .a-win { --st-ok: #5fd3a0; --st-ok-bg: #0f3b2c; --st-warn: #f2b84b; --st-warn-bg: #4a3208; --st-danger: #ff8a8a; --st-danger-bg: #5a1a22; --st-info: #6cb8f0; --st-info-bg: #12365a;
+    display: flex; height: 652px; background: #1b1a18; color: #ede8e3; border-radius: 12px 0 0 0; overflow: hidden; font: 400 14px/20px 'Inter', system-ui, sans-serif; --a-mono: 'JetBrains Mono', ui-monospace, monospace; box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 30px 70px -30px rgb(0 0 0 / .7); }
+  .a-rail { flex: none; width: 64px; padding: 12px 8px; background: #252422; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .a-rail img { height: 32px; width: auto; margin-bottom: 8px; }
+  .a-rail span { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: #a39a92; }
+  .a-rail span.is-on { background: #302e2b; color: #f0625a; }
+  .a-rail svg, .a-ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .a-page { min-width: 0; flex: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 24px; }
+  .a-page h4 { margin: 0; font: 600 24px/32px 'Inter', system-ui, sans-serif; color: inherit; }
+  .a-page .sub { margin: 4px 0 0; font-size: 14px; color: #c6beb6; }
+  .a-counts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; list-style: none; margin: 0; padding: 0; }
+  .a-count { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: #252422; border: 1px solid #4d4944; border-radius: 10px; }
+  .a-count .lbl { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+  .a-count .lbl svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .a-count .num { font-size: 32px; line-height: 40px; font-variant-numeric: tabular-nums; }
+  .c-ok { color: var(--st-ok); } .c-warn { color: var(--st-warn); } .c-danger { color: var(--st-danger); } .c-info { color: var(--st-info); }
+  .a-filters { display: flex; gap: 12px; }
+  .a-select { flex: 1; min-width: 0; height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 1px solid #847d75; border-radius: 6px; font-size: 14px; color: #ede8e3; white-space: nowrap; overflow: hidden; }
+  .a-select svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .a-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; list-style: none; margin: 0; padding: 0; }
+  .a-mov { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: #252422; border: 1px solid #302e2b; border-radius: 10px; }
+  .a-mov.is-flag { border-color: #4d4944; }
+  .a-mov .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .a-mov .cod { font: 400 14px/20px var(--a-mono); }
+  .a-mov .tipo { margin: 0; font-size: 14px; color: #c6beb6; }
+  .a-mov .pat { margin: 0; font: 400 14px/20px var(--a-mono); color: #a39a92; }
+  .b-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 99px; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
+  .b-badge svg { flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .b-ok { background: var(--st-ok-bg); color: var(--st-ok); } .b-warn { background: var(--st-warn-bg); color: var(--st-warn); }
+  .b-danger { background: var(--st-danger-bg); color: var(--st-danger); } .b-info { background: var(--st-info-bg); color: var(--st-info); }
+  .a-alert { background: var(--bg); display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border: 1px solid; border-radius: 6px; font: 400 14px/20px 'Inter', system-ui, sans-serif; text-align: left; box-shadow: 0 14px 32px -18px rgb(0 0 0 / .6); }
+  .a-alert svg { width: 16px; height: 16px; flex: none; margin-top: 2px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .a-alert.b-ok { border-color: var(--st-ok); --bg: var(--st-ok-bg); } .a-alert.b-warn { border-color: var(--st-warn); --bg: var(--st-warn-bg); } .a-alert.b-danger { border-color: var(--st-danger); --bg: var(--st-danger-bg); } .a-alert.b-info { border-color: var(--st-info); --bg: var(--st-info-bg); }
+  /* the state changes: four phases of one cycle, hard cuts like the real UI */
+  .ph { display: grid; }
+  .ph > * { grid-area: 1 / 1; opacity: 0; pointer-events: none; animation: p4 var(--cy) ease-in-out infinite; animation-delay: calc(var(--cy) * -0.08); }
+  .ph > :first-child { opacity: 1; }
+  .ph > :nth-child(2) { animation-delay: calc(var(--cy) * 0.17); }
+  .ph > :nth-child(3) { animation-delay: calc(var(--cy) * 0.42); }
+  .ph > :nth-child(4) { animation-delay: calc(var(--cy) * 0.67); }
+  .ph--end > * { justify-self: end; }
+  @keyframes p4 { 0% { opacity: 0; } 4% { opacity: 1; } 24% { opacity: 1; } 29%, 100% { opacity: 0; } }
+  .a-mov.is-cycle { animation: bord var(--cy) ease-in-out infinite; animation-delay: calc(var(--cy) * -0.08); }
+  @keyframes bord { 0%, 19% { border-color: #302e2b; } 29%, 94% { border-color: #4d4944; } 100% { border-color: #302e2b; } }
+  .is-m-paused .ph > *, .is-m-paused .a-mov.is-cycle { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) { .ph > *, .a-mov.is-cycle { animation: none !important; } }
+  @media (max-width: 639px) { .a-rail { display: none; } .a-win { height: 560px; } .a-page { padding: 16px; gap: 16px; } }
+  @media (max-width: 1023px) { .hero__art > .ly-piece--note { left: var(--s-4); bottom: var(--s-4); width: 280px; } }
+
+  /* section 2: the real list of móviles and the real revision form (centralBV front), one slow cycle */
+  :root { --st-ok: #5fd3a0; --st-ok-bg: #0f3b2c; --st-warn: #f2b84b; --st-warn-bg: #4a3208; --st-danger: #ff8a8a; --st-danger-bg: #5a1a22; --st-info: #6cb8f0; --st-info-bg: #12365a; }
+  .rp { --cy3: 9s; position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); height: 540px; margin-top: var(--s-7); overflow: hidden; background: #1b1a18; color: #ede8e3; border: 1px solid #302e2b; border-radius: 12px; font: 400 14px/20px 'Inter', system-ui, sans-serif; }
+  .rp::after { content: ""; position: absolute; inset: auto 0 0 0; height: 56px; background: linear-gradient(transparent, #1b1a18); pointer-events: none; }
+  .rp h4 { margin: 0; font: 600 24px/32px 'Inter', system-ui, sans-serif; color: inherit; }
+  .rp p { margin: 0; }
+  .rp__list { padding: 24px 20px 0; display: flex; flex-direction: column; gap: 20px; min-width: 0; border-right: 1px solid #302e2b; }
+  .rp__head p { font-size: 14px; color: #a39a92; }
+  .rp__table { overflow: hidden; border: 1px solid #302e2b; border-radius: 10px; background: #252422; }
+  .rp table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .rp th, .rp td { text-align: left; padding: 0 8px; height: 40px; white-space: nowrap; }
+  .rp thead th { font: 500 12px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: #a39a92; background: #302e2b; height: 36px; }
+  .rp tbody tr { border-top: 1px solid #302e2b; }
+  .rp tbody th { font-weight: 600; }
+  .rp .mono { font: 400 14px/20px 'JetBrains Mono', ui-monospace, monospace; }
+  .rp .sec { color: #c6beb6; max-width: 108px; overflow: hidden; text-overflow: ellipsis; }
+  .rp__form { padding: 24px 24px 0; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .rp__top { display: flex; justify-content: space-between; gap: 16px; }
+  .rp .back { font-size: 14px; color: #f0625a; margin-bottom: 8px; }
+  .rp .sub { font-size: 14px; color: #a39a92; margin-top: 4px; }
+  .rp .marks { text-align: right; font-size: 12px; line-height: 16px; color: #a39a92; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+  .rp .count { font: 500 20px/28px 'JetBrains Mono', ui-monospace, monospace; color: #ede8e3; }
+  .rp .count .is-ok { color: var(--st-ok); }
+  .alert-slot { min-height: 40px; }
+  .rp .a-alert { width: 100%; box-shadow: none; }
+  .rp .a-alert.b-danger { border-color: var(--st-danger); background: var(--st-danger-bg); color: var(--st-danger); }
+  .rp .a-alert.b-none { border-color: transparent; background: transparent; }
+  .vsec { border: 1px solid #302e2b; border-radius: 10px; background: #252422; overflow: hidden; }
+  .vsec h5 { margin: 0; padding: 10px 20px; background: #302e2b; font: 500 12px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: #a39a92; }
+  .vrow { display: flex; align-items: flex-start; gap: 24px; padding: 10px 20px; border-top: 1px solid #302e2b; }
+  .vsec h5 + .vrow { border-top: 0; }
+  .vlab { width: 224px; flex: none; padding-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+  .vname { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; }
+  .help { font-size: 12px; line-height: 16px; color: #a39a92; white-space: nowrap; }
+  .tag { border: 1px solid var(--st-danger); border-radius: 4px; padding: 0 6px; font: 400 11px/16px 'JetBrains Mono', ui-monospace, monospace; text-transform: uppercase; color: var(--st-danger); }
+  .vctl { display: flex; min-width: 0; flex: 1; }
+  .vctl-in { display: flex; align-items: flex-start; gap: 12px; }
+  .segs { display: flex; gap: 8px; flex: none; }
+  .seg { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 12px; border: 1px solid #302e2b; border-radius: 6px; font-size: 14px; color: #c6beb6; white-space: nowrap; }
+  .seg svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .seg.on-ok { border-color: var(--st-ok); background: var(--st-ok-bg); color: var(--st-ok); }
+  .seg.on-atencion { border-color: var(--st-warn); background: var(--st-warn-bg); color: var(--st-warn); }
+  .seg.on-critico { border-color: var(--st-danger); background: var(--st-danger-bg); color: var(--st-danger); }
+  .detail { display: flex; align-items: center; height: 40px; min-width: 0; padding: 0 12px; border: 1px solid #847d75; border-radius: 6px; font-size: 14px; color: #ede8e3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #1b1a18; }
+  .rp .b-badge { font-size: 12px; }
+  /* three phases of 3 s, each one fading into the next */
+  .ph3 { display: grid; }
+  .ph3 > * { grid-area: 1 / 1; opacity: 0; pointer-events: none; animation: p3 var(--cy3) ease-in-out infinite; animation-delay: calc(var(--cy3) * -0.08); }
+  .ph3 > :first-child { opacity: 1; }
+  .ph3 > :nth-child(2) { animation-delay: calc(var(--cy3) * 0.253); }
+  .ph3 > :nth-child(3) { animation-delay: calc(var(--cy3) * 0.587); }
+  .ph--start > * { justify-self: start; }
+  @keyframes p3 { 0% { opacity: 0; } 5% { opacity: 1; } 31% { opacity: 1; } 36.666%, 100% { opacity: 0; } }
+  .rp.is-m-paused .ph3 > * { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) { .ph3 > * { animation: none !important; } }
+  @media (max-width: 1023px) { .rp { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: 620px; } .rp__list { border-right: 0; border-bottom: 1px solid #302e2b; max-height: 190px; overflow: hidden; padding-bottom: 16px; } .rp__head p { display: none; } }
+  @media (max-width: 639px) { .rp { height: 560px; } .rp__list { display: none; } .rp__form { padding: 16px 16px 0; } .vrow { flex-direction: column; gap: 8px; } .vlab { width: auto; padding-top: 0; } .detail { display: none; } .seg { padding: 0 8px; } .rp .marks span:first-child { display: none; } }
+
+  /* app-frame section (kit, unused now) */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+  @media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+  @media (max-width: 1023px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane--list::after { display: none; }
+    .app .ui-win__side { display: none; }
+    .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+  .app .ui-checks__group { list-style: none; padding: 14px 16px 4px; font-size: 13px; font-weight: 500; color: var(--u-soft); }
+  .app .ui-check__crit { margin-left: auto; font: 500 13px/1 var(--font-mono); color: #ff8a8a; }
+  .app .a-result { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--u-line); font-size: 14px; }
+
+  @media (max-width: 639px) { #preguntas .faq > .faq__item { padding-block: 10px; } #preguntas .faq__item p { font-size: 15px; line-height: 22px; } #preguntas .faq > .faq__item:first-child { padding-top: 0; } }
+  #contacto { display: grid; gap: 12px; padding: 32px; }
+  #pie { padding-top: 72px; }
+  #contacto h3 { margin: 0; }
+  #contacto p { margin: 0; line-height: 1.5; }
+  #contacto .btn-row { margin-top: 12px; }
+  #constancias ul { display: grid; gap: 12px; }
+  #constancias ul li { line-height: 1.5; }
+  #preguntas .faq__item h3 { line-height: 1.3; }
+  #preguntas .faq__item p { line-height: 1.55; }
+  @media (max-width: 639px) { #contacto { padding: 24px; } }
+  @media (max-width: 639px) { #contacto .card .t-label { display: none; } #contacto { padding-top: 96px; } #contacto .stack-6 { gap: 20px; } #contacto .card { padding: 16px 20px; } }
+  /* card: the real avisos of the revision (Alert tones of the front), one outcome per phase */
+  .mp { --cy3: 9s; position: relative; height: 100%; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; background: #1b1a18; color: #ede8e3; font: 400 14px/20px 'Inter', system-ui, sans-serif; overflow: hidden; }
+  .mp h4 { margin: 0; font: 600 20px/28px 'Inter', system-ui, sans-serif; color: inherit; }
+  .mp p { margin: 0; }
+  .mp-t { display: flex; align-items: center; gap: 12px; }
+  .mp-head > p { color: #c6beb6; font-size: 14px; }
+  .mp-step { display: flex; flex-direction: column; gap: 8px; }
+  .mp-cap { font-size: 12px; line-height: 16px; color: #a39a92; }
+  .mp .a-alert { box-shadow: none; width: 100%; }
+  .mp.is-m-paused .ph3 > * { animation-play-state: paused; }
+  @media (max-width: 639px) { .mp { padding: 16px; } }
+  @media (max-width: 639px) { .mp { padding: 16px; gap: 10px; } .mp-cap, .mp-head > p { display: none; } }
+  /* section 3: the real form, then the constancia it generates (generic letterhead, sample data) */
+  #constancias .cf { --cf: 9s; position: relative; height: 614px; overflow: hidden; background: #1b1a18; color: #ede8e3; border: 1px solid #302e2b; border-radius: 12px; font: 400 14px/20px 'Inter', system-ui, sans-serif; }
+  .cf::after { content: ""; position: absolute; inset: auto 0 0 0; height: 48px; background: linear-gradient(transparent, #1b1a18); pointer-events: none; }
+  .cf h4 { margin: 0; font: 600 20px/28px 'Inter', system-ui, sans-serif; color: inherit; }
+  .cf p { margin: 0; }
+  .cf-view { position: absolute; inset: 0; padding: 24px; display: flex; flex-direction: column; gap: 16px; opacity: 0; pointer-events: none; }
+  .cf-view.v1 { opacity: 1; animation: cf1 var(--cf) ease-in-out infinite; animation-delay: calc(var(--cf) * -0.08); }
+  .cf-view.v23 { animation: cf23 var(--cf) ease-in-out infinite; gap: 14px; }
+  @keyframes cf1 { 0% { opacity: 0; } 5% { opacity: 1; } 24% { opacity: 1; } 29%, 100% { opacity: 0; } }
+  @keyframes cf23 { 0%, 23% { opacity: 0; } 29%, 91% { opacity: 1; } 96.7%, 100% { opacity: 0; } }
+  .cf-sec { background: #252422; border: 1px solid #302e2b; border-radius: 10px; padding: 20px; }
+  .cf .eyebrow { font: 500 12px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: #a39a92; margin-bottom: 16px; }
+  .cf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cf-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .cf-field.span2 { grid-column: 1 / -1; }
+  .cf-field .lab { font-size: 14px; color: #c6beb6; }
+  .cf-field .req { color: #f0625a; }
+  .cf-field .inp { display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 12px; border: 1px solid #847d75; border-radius: 6px; background: #1b1a18; font-size: 14px; }
+  .cf-field .inp.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .cf .chv { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; color: #a39a92; }
+  .cf-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .cf-btn { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border: 1px solid #4d4944; border-radius: 10px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+  .cf-btn.primary { background: #c8281e; border-color: #c8281e; color: #fff; }
+  .cf-heads { display: grid; }
+  .cf-head { grid-area: 1 / 1; opacity: 0; display: flex; flex-direction: column; gap: 10px; animation: p3 var(--cf) ease-in-out infinite; min-height: 82px; }
+  .cf-head p { font-size: 14px; color: #c6beb6; }
+  .cf-head.d2 { animation-delay: calc(var(--cf) * 0.253); }
+  .cf-head.d3 { animation-delay: calc(var(--cf) * 0.587); }
+  .cf-head .cf-btn { height: 36px; padding: 0 12px; font-size: 13px; }
+  .cf-sheet { align-self: center; width: 440px; max-width: 100%; background: #fff; color: #111; padding: 22px 26px 26px; display: flex; flex-direction: column; gap: 9px; font: 400 11px/15px 'Inter', system-ui, sans-serif; border-radius: 2px; }
+  .cf-sheet .mb { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 4px; }
+  .cf-sheet .logo { width: 38px; height: 38px; border: 2px solid #c8281e; border-radius: 50%; display: grid; place-items: center; color: #c8281e; }
+  .cf-sheet .logo svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+  .cf-sheet .mb b { font-size: 11px; }
+  .cf-sheet .bar { display: block; height: 5px; border-radius: 3px; background: #d9d6d2; }
+  .cf-sheet .w100 { width: 100%; } .cf-sheet .w90 { width: 90%; } .cf-sheet .w60 { width: 60%; } .cf-sheet .w40 { width: 40%; }
+  .cf-sheet .ttl { text-align: center; font-weight: 700; text-decoration: underline; font-size: 12px; margin: 4px 0; }
+  .cf-sheet p { display: flex; gap: 6px; }
+  .cf-sheet .r { margin-left: auto; }
+  .cf-sheet .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; margin-top: 10px; }
+  .cf-sheet .sig span { border-bottom: 1px solid #111; padding-bottom: 2px; min-height: 18px; }
+  @media (max-width: 1023px) { #constancias .cf { height: 520px; } }
+  @media (max-width: 639px) { #constancias .cf { height: 380px; } .cf-view { padding: 16px; } .cf-sheet { width: 100%; padding: 16px; } .cf-head .cf-btns .cf-btn:nth-child(2) { display: none; } .cf-sec { padding: 14px; } .cf-grid { gap: 10px; } }
+  .cf.is-m-paused .cf-view, .cf.is-m-paused .cf-head { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) { .cf-view, .cf-head { animation: none !important; } .cf-view.v1 { opacity: 0; } .cf-view.v23 { opacity: 1; } .cf-head.d2 { opacity: 0; } .cf-head.d3 { opacity: 1; } }
+
+
+  /* features: one --p-h per group */
+  #funciones .panel { --p-h: 300px; }
+  #funciones .panel--dg { background: #302e2b; }
+  @media (max-width: 639px) { #funciones .panel { --p-h: 170px; } }
+  @media (max-width: 639px) { main > #funciones, main > #preguntas { --h: 2; } }
+</style>
+</head>
+<body>
+<!-- type: software
+     deal: hero collage (lit ground sand), nav-mega, footer-columns, close-type, rhythm dark-band (the constancias section on the inverse ground), buttons solid, mark: the client's own logotipo; palette: centralBV's own tokens (bg #1B1A18, accent #C8281E); pairing instrument; moments none, effect none, scene none
+     plan: hero (1) / moviles app-frame (1, app) / constancias split on the inverse band (1, use: doc) / funciones 2x2 (2: diagram, notify, toggles, search) / preguntas faq (1) / footer.closing (1) -->
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="s-ok" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m5.5 8 1.8 1.8 3.2-3.4"/></symbol>
+  <symbol id="s-warn" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 10.8v.1"/></symbol>
+  <symbol id="s-danger" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="m6 6 4 4m0-4-4 4"/></symbol>
+  <symbol id="s-info" viewBox="0 0 16 16"><path d="M10.2 3.2a3 3 0 0 0-3.4 4L2.8 11.2a1.2 1.2 0 0 0 1.7 1.7l4-4a3 3 0 0 0 4-3.4l-1.8 1.8-1.7-.4-.4-1.7z"/></symbol>
+  <symbol id="s-tri" viewBox="0 0 16 16"><path d="M8 2.2 14 13H2z"/><path d="M8 6.5v3M8 11.2v.1"/></symbol>
+  <symbol id="s-inf" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 11V8M8 5.2v.1"/></symbol>
+  <symbol id="s-flame" viewBox="0 0 20 20"><path d="M10 17c-2.8 0-4.5-1.8-4.5-4.3 0-1.8 1-3 2-4.2.7-.8 1.2-1.7 1.3-3 1.8 1 3.7 3.1 3.7 5.4 0 .8-.2 1.4-.6 1.9.8-.2 1.6-.9 1.6-2.2 1.4 1.2 1.5 2.4 1.5 3.2C15 15.5 13 17 10 17z"/></symbol>
+  <symbol id="s-chev" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></symbol>
+  <symbol id="s-grid" viewBox="0 0 20 20"><rect x="3" y="3" width="5.5" height="5.5" rx="1"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1"/></symbol>
+  <symbol id="s-file" viewBox="0 0 20 20"><path d="M5 2.5h6.5L16 7v10.5H5z"/><path d="M11.5 2.5V7H16M7.5 11h5M7.5 14h5"/></symbol>
+  <symbol id="s-truck" viewBox="0 0 20 20"><path d="M2 5h9v8H2zM11 8h4l3 3v2h-7z"/><circle cx="6" cy="14.5" r="1.8"/><circle cx="14.5" cy="14.5" r="1.8"/></symbol>
+  <symbol id="s-users" viewBox="0 0 20 20"><circle cx="8" cy="7" r="3"/><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M13 4.4a3 3 0 0 1 0 5.2M14.5 11.8c1.6.5 2.7 1.8 3 4.2"/></symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav__bar">
+    <a class="nav__logo" href="#top" aria-label="centralBV"><img src="assets/brand/logotipo.svg" alt="centralBV" height="40" style="height:40px;width:auto"></a>
+    <nav class="nav__links" aria-label="Principal">
+      <div class="nav__item">
+        <a class="nav__link" href="#moviles">Producto <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Móviles</p>
+              <a href="#moviles">Estado de la flota<span>Cada móvil con su estado</span></a>
+              <a href="#funciones">Revisión de un móvil<span>Desde la ficha, con estado automático</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Guardia</p>
+              <a href="#constancias">Constancias en PDF<span>Incendios de vehículos y viviendas</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="#constancias">Constancias</a></div>
+      <div class="nav__item"><a class="nav__link" href="#funciones">Funciones</a></div>
+      <div class="nav__item"><a class="nav__link" href="#preguntas">Preguntas</a></div>
+    </nav>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menú">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--collage" aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <h1 id="hero-h">App de gestión para cuarteles de bomberos</h1>
+        <p class="hero__lead">Genera las constancias de actuación en PDF A4 y lleva el estado de cada móvil de emergencia. Los inspectores revisan desde el celular.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="?demo=1">Probar la demo</a>
+        </div>
+        <p class="hero__proof">Pensada para la guardia de un cuartel de bomberos voluntarios.</p>
+      </div>
+      <div class="hero__art span-6 start-7" data-m-loop data-no-restart role="img" aria-label="El dashboard de centralBV: los contadores y las tarjetas de la flota cambian de color cuando un móvil pasa de Operativo a Con observaciones, Fuera de servicio y En mantenimiento">
+        <div class="ly-piece ly-piece--main a-win" aria-hidden="true">
+          <div class="a-rail">
+            <img src="assets/brand/isotipo.svg" alt="">
+            <span class="is-on"><svg><use href="#s-grid"/></svg></span><span><svg><use href="#s-file"/></svg></span><span><svg><use href="#s-truck"/></svg></span><span><svg><use href="#s-users"/></svg></span>
+          </div>
+          <div class="a-page">
+            <div><h4>Dashboard</h4><p class="sub">Estado de la flota · actualizado 09:42</p></div>
+            <ul class="a-counts">
+              <li class="a-count"><span class="lbl c-ok"><svg><use href="#s-ok"/></svg>Operativo</span><span class="num ph"><span>6</span><span>5</span><span>5</span><span>5</span></span></li>
+              <li class="a-count"><span class="lbl c-warn"><svg><use href="#s-warn"/></svg>Con observaciones</span><span class="num ph"><span>1</span><span>2</span><span>1</span><span>1</span></span></li>
+              <li class="a-count"><span class="lbl c-danger"><svg><use href="#s-danger"/></svg>Fuera de servicio</span><span class="num ph"><span>1</span><span>1</span><span>2</span><span>1</span></span></li>
+              <li class="a-count"><span class="lbl c-info"><svg><use href="#s-info"/></svg>En mantenimiento</span><span class="num ph"><span>0</span><span>0</span><span>0</span><span>1</span></span></li>
+            </ul>
+            <div class="a-filters"><span class="a-select">Todos los estados<svg><use href="#s-chev"/></svg></span><span class="a-select">Todos los tipos<svg><use href="#s-chev"/></svg></span></div>
+            <ul class="a-cards">
+              <li class="a-mov"><div class="top"><span class="cod">AB-01</span><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></div><p class="tipo">Autobomba</p><p class="pat">AB 123 CD</p></li>
+              <li class="a-mov is-cycle"><div class="top"><span class="cod">AB-02</span><span class="ph ph--end"><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span><span class="b-badge b-warn"><svg><use href="#s-warn"/></svg>Con observaciones</span><span class="b-badge b-danger"><svg><use href="#s-danger"/></svg>Fuera de servicio</span><span class="b-badge b-info"><svg><use href="#s-info"/></svg>En mantenimiento</span></span></div><p class="tipo">Autobomba</p><p class="pat">AC 456 EF</p></li>
+              <li class="a-mov"><div class="top"><span class="cod">AB-03</span><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></div><p class="tipo">Autobomba</p><p class="pat">AD 789 GH</p></li>
+              <li class="a-mov is-flag"><div class="top"><span class="cod">R-01</span><span class="b-badge b-warn"><svg><use href="#s-warn"/></svg>Con observaciones</span></div><p class="tipo">Rescate</p><p class="pat">AE 012 IJ</p></li>
+            </ul>
+          </div>
+        </div>
+        <div class="ly-piece ly-piece--note" aria-hidden="true">
+          <div class="ph">
+            <div class="a-alert b-ok"><svg><use href="#s-ok"/></svg><div>Revisión guardada. AB-02 queda Operativo.</div></div>
+            <div class="a-alert b-warn"><svg><use href="#s-warn"/></svg><div>Hay verificaciones en Atención: al guardar, AB-02 queda Con observaciones.</div></div>
+            <div class="a-alert b-danger"><svg><use href="#s-danger"/></svg><div>Falla crítica (frenos): al guardar, AB-02 pasa a Fuera de servicio.</div></div>
+            <div class="a-alert b-info"><svg><use href="#s-info"/></svg><div>AB-02 está En mantenimiento: al final, contá qué se hizo.</div></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section" id="moviles" aria-labelledby="moviles-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <div class="span-5"><div class="section-head"><h2 id="moviles-h">Cada móvil con su estado, en una sola pantalla</h2></div></div>
+        <div class="span-6 start-7">
+          <p class="t-lead muted">La lista muestra los móviles y su estado; al elegir uno, se abre la revisión con sus siete verificaciones. Al guardar, el estado se recalcula solo.</p>
+        </div>
+      </div>
+      <div class="rp" data-m-loop data-no-restart role="img" aria-label="La lista de móviles junto a la revisión de AB-02: al marcar Crítico en frenos, el aviso se pone rojo y, al guardar, AB-02 pasa a Fuera de servicio">
+        <div class="rp__list" aria-hidden="true">
+          <div class="rp__head"><h4>Móviles</h4><p>8 móviles</p></div>
+          <div class="rp__table"><table><thead><tr><th>N.º interno</th><th>Patente</th><th>Tipo</th><th>Estado</th></tr></thead><tbody><tr><th scope="row">AB-01</th><td class="mono">AB 123 CD</td><td class="sec">Autobomba</td><td><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></td></tr><tr><th scope="row">AB-02</th><td class="mono">AC 456 EF</td><td class="sec">Autobomba</td><td><span class="ph3 ph--start"><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span><span class="b-badge b-danger"><svg><use href="#s-danger"/></svg>Fuera de servicio</span></span></td></tr><tr><th scope="row">AB-03</th><td class="mono">AD 789 GH</td><td class="sec">Autobomba</td><td><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></td></tr><tr><th scope="row">R-01</th><td class="mono">AE 012 IJ</td><td class="sec">Rescate</td><td><span class="b-badge b-warn"><svg><use href="#s-warn"/></svg>Con observaciones</span></td></tr><tr><th scope="row">R-02</th><td class="mono">AF 345 KL</td><td class="sec">Rescate</td><td><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></td></tr><tr><th scope="row">T-01</th><td class="mono">AG 678 MN</td><td class="sec">Transporte de personal</td><td><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></td></tr><tr><th scope="row">T-02</th><td class="mono">AH 901 OP</td><td class="sec">Transporte de personal</td><td><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></td></tr><tr><th scope="row">V-01</th><td class="mono">AI 234 QR</td><td class="sec">Van</td><td><span class="b-badge b-danger"><svg><use href="#s-danger"/></svg>Fuera de servicio</span></td></tr></tbody></table></div>
+        </div>
+        <div class="rp__form" aria-hidden="true">
+          <div class="rp__top">
+            <div><p class="back">← AB-02</p><h4>Revisión del móvil</h4><p class="sub">AB-02 · Autobomba · Iveco Tector · AC 456 EF</p></div>
+            <div class="marks"><span>Verificaciones marcadas</span><span class="ph3 count"><span class="n">6 de 7</span><span class="n is-ok">7 de 7</span><span class="n is-ok">7 de 7</span></span></div>
+          </div>
+          <div class="ph3 alert-slot"><div class="a-alert b-none"></div><div class="a-alert b-danger"><svg><use href="#s-danger"/></svg><div>Falla crítica (frenos): al guardar, AB-02 pasa a Fuera de servicio.</div></div><div class="a-alert b-danger"><svg><use href="#s-danger"/></svg><div>Revisión guardada. AB-02 pasó a Fuera de servicio por falla crítica.</div></div></div>
+          <section class="vsec"><h5>Mecánica y fluidos</h5>
+            <div class="vrow"><div class="vlab"><span class="vname">Nivel de aceite</span></div><div class="vctl"><span class="segs"><span class="seg on-ok"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg"><svg><use href="#s-danger"/></svg>Crítico</span></span></div></div>
+            
+            <div class="vrow"><div class="vlab"><span class="vname">Refrigerante</span></div><div class="vctl"><span class="segs"><span class="seg on-ok"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg"><svg><use href="#s-danger"/></svg>Crítico</span></span></div></div>
+            <div class="vrow ph3-row"><div class="vlab"><span class="vname">Frenos<span class="tag">Crítico</span></span></div><div class="vctl ph3"><div class="vctl-in"><span class="segs"><span class="seg"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg"><svg><use href="#s-danger"/></svg>Crítico</span></span></div><div class="vctl-in"><span class="segs"><span class="seg"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg on-critico"><svg><use href="#s-danger"/></svg>Crítico</span></span><span class="detail">Pedal esponjoso, pierde presión</span></div><div class="vctl-in"><span class="segs"><span class="seg"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg on-critico"><svg><use href="#s-danger"/></svg>Crítico</span></span><span class="detail">Pedal esponjoso, pierde presión</span></div></div></div>
+            <div class="vrow"><div class="vlab"><span class="vname">Batería</span></div><div class="vctl"><span class="segs"><span class="seg on-ok"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg"><svg><use href="#s-danger"/></svg>Crítico</span></span></div></div>
+          </section>
+          <section class="vsec"><h5>Neumáticos</h5>
+            <div class="vrow"><div class="vlab"><span class="vname">Presión de neumáticos (aire en ruedas)</span></div><div class="vctl"><span class="segs"><span class="seg on-ok"><svg><use href="#s-ok"/></svg>Ok</span><span class="seg"><svg><use href="#s-warn"/></svg>Atención</span><span class="seg"><svg><use href="#s-danger"/></svg>Crítico</span></span></div></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ground-inverse" id="constancias" aria-labelledby="constancias-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <div class="span-5">
+          <div class="section-head"><h2 id="constancias-h">Constancias en PDF sin errores de tipeo</h2></div>
+          <p class="t-lead">Cargás los datos una sola vez. La app completa la plantilla y arma el PDF de tres hojas en A4.</p>
+          <ul class="stack-3 t-body" style="padding:0;list-style:none;margin:var(--s-5) 0 0">
+            <li>Los datos se vuelcan solos, sin copiar y pegar</li>
+            <li>Descargá o imprimí el PDF desde la app</li>
+            <li>Marcá la constancia como firmada</li>
+          </ul>
+        </div>
+        <div class="cf span-6 start-7" data-m-loop data-no-restart role="img" aria-label="El formulario de una solicitud con sus datos, y después la constancia generada con esos datos en una plantilla A4, lista para descargar, imprimir o marcar como firmada"><div class="cf-view v1"><h4>Nueva solicitud</h4><div class="cf-sec"><p class="eyebrow">Siniestro</p><div class="cf-grid"><div class="cf-field "><span class="lab">Tipo de siniestro<span class="req"> *</span></span><span class="inp">Vehículo<svg class="chv"><use href="#s-chev"/></svg></span></div><div class="cf-field "><span class="lab">Fecha<span class="req"> *</span></span><span class="inp">15/03/2026</span></div><div class="cf-field span2"><span class="lab">Domicilio del hecho<span class="req"> *</span></span><span class="inp">Av. San Martín 100</span></div><div class="cf-field "><span class="lab">N.º de parte<span class="req"> *</span></span><span class="inp">001</span></div><div class="cf-field "><span class="lab">Hora<span class="req"> *</span></span><span class="inp">15:07</span></div></div></div><div class="cf-sec"><p class="eyebrow">Constancia</p><div class="cf-grid"><div class="cf-field "><span class="lab">Destino<span class="req"> *</span></span><span class="inp">Seguro<svg class="chv"><use href="#s-chev"/></svg></span></div><div class="cf-field "><span class="lab">N.º de póliza<span class="req"> *</span></span><span class="inp mono">000123</span></div></div></div><div class="cf-btns"><span class="cf-btn primary">Guardar solicitud</span><span class="cf-btn">Cancelar</span></div></div><div class="cf-view v23"><div class="cf-heads"><div class="cf-head d2"><h4>Generar constancia</h4><p>Los datos de la solicitud se completaron automáticamente.</p></div><div class="cf-head d3"><div><h4>Constancia N.º 00001 <span class="b-badge b-ok" style="vertical-align:middle">Generada</span></h4><p>3 hojas · formato A4</p></div><div class="cf-btns"><span class="cf-btn primary">Descargar PDF (3 hojas)</span><span class="cf-btn">Imprimir</span><span class="cf-btn primary">Marcar como firmada</span></div></div></div><div class="cf-sheet"><div class="mb"><span class="logo"><svg><use href="#s-flame"/></svg></span><b>CUARTEL DE BOMBEROS VOLUNTARIOS</b><i class="bar w60"></i><i class="bar w40"></i></div><p class="ttl">CONSTANCIA DE SINIESTRO</p><p><b>SOLICITANTE:</b> <u>Juan Pérez</u><span class="r"><b>DNI:</b> <u>12.345.678</u></span></p><p><b>DOMICILIO DEL HECHO:</b> <u>Av. San Martín 100</u></p><p><b>LOCALIDAD:</b> <u>Villa Norte</u><span class="r"><b>PARTIDO:</b> <u>Partido Norte</u></span></p><p><b>MOTIVO:</b> <u>Incendio de vehículo</u></p><p><b>PARA SER PRESENTADO:</b> <u>Aseguradora Sur</u></p><p><b>PARTE N.º:</b> <u>001</u><span class="r"><b>FECHA:</b> <u>15/03/2026</u></span></p><p><b>HORA:</b> <u>15:07 HS.</u></p><i class="bar w100"></i><i class="bar w90"></i><div class="sig"><span><b>RETIRO:</b></span><span><b>DNI:</b></span><span><b>FIRMA:</b></span><span><b>FECHA:</b></span></div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="funciones" aria-labelledby="funciones-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="funciones-h">Hecha para la guardia. <span class="muted">Revisiones y estados sin planillas sueltas.</span></h2>
+        </div>
+        <div class="grid">
+          <article class="card card--row span-6">
+            <h3>Registra una revisión paso a paso</h3>
+            <p>Cualquier usuario la registra desde la ficha. Al guardar, el móvil cambia de estado solo.</p>
+            <div class="panel panel--flush panel--dg"><div class="dg" data-diagram data-ui-loop><script type="application/json">{"layout":"timeline","alt":"Elegir el móvil en el dashboard o la lista, abrir su ficha, marcar cada verificación, guardar la revisión y ver el resultado en la última revisión.","steps":[{"label":"Elegís el móvil","sub":"Dashboard o lista","icon":"ui:truck"},{"label":"Abrís la ficha","sub":"Registrar revisión","icon":"ui:file-text"},{"label":"Marcás cada ítem","sub":"Con su detalle","icon":"ui:list-checks"},{"label":"Guardás","sub":"Estado al día","icon":"ui:save"},{"label":"Ves el resultado","sub":"Última revisión","icon":"ui:circle-check"}]}</script></div></div>
+          </article>
+        <article class="card card--row span-6">
+            <h3>Actualiza el estado del móvil</h3>
+            <p>Un ítem crítico deja al móvil fuera de servicio; una atención, con observaciones.</p>
+            <div class="panel panel--flush panel--dg"><div class="mp" data-m-loop data-no-restart role="img" aria-label="Los avisos de la revisión de AB-02: con una atención queda Con observaciones, con una falla crítica pasa a Fuera de servicio y con todo en Ok vuelve a Operativo">
+              <div class="mp-head"><div class="mp-t"><h4>AB-02</h4><span class="ph3 ph--start"><span class="b-badge b-warn"><svg><use href="#s-warn"/></svg>Con observaciones</span><span class="b-badge b-danger"><svg><use href="#s-danger"/></svg>Fuera de servicio</span><span class="b-badge b-ok"><svg><use href="#s-ok"/></svg>Operativo</span></span></div><p>Autobomba · Iveco Tector · AC 456 EF</p></div>
+              <div class="ph3 mp-steps"><div class="mp-step"><p class="mp-cap">Al marcar la revisión</p><div class="a-alert b-warn"><svg><use href="#s-warn"/></svg><div>Hay verificaciones en Atención: al guardar, AB-02 queda Con observaciones.</div></div><p class="mp-cap">Al guardar</p><div class="a-alert b-warn"><svg><use href="#s-warn"/></svg><div>Revisión guardada. AB-02 queda Con observaciones.</div></div></div><div class="mp-step"><p class="mp-cap">Al marcar la revisión</p><div class="a-alert b-danger"><svg><use href="#s-danger"/></svg><div>Falla crítica (frenos): al guardar, AB-02 pasa a Fuera de servicio.</div></div><p class="mp-cap">Al guardar</p><div class="a-alert b-danger"><svg><use href="#s-danger"/></svg><div>Revisión guardada. AB-02 pasó a Fuera de servicio por falla crítica.</div></div></div><div class="mp-step"><p class="mp-cap">Al marcar la revisión</p><div class="a-alert b-ok"><svg><use href="#s-ok"/></svg><div>Todo en Ok: al guardar, AB-02 vuelve a Operativo.</div></div><p class="mp-cap">Al guardar</p><div class="a-alert b-ok"><svg><use href="#s-ok"/></svg><div>Revisión guardada. AB-02 queda Operativo.</div></div></div></div>
+            </div></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="preguntas" aria-labelledby="preguntas-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <div class="span-5 stack-4">
+          <div class="section-head"><h2 id="preguntas-h">Preguntas frecuentes</h2></div>
+          <p class="t-lead muted">Lo que suele preguntar un cuartel antes de probarla.</p>
+          <div class="card card--row" id="contacto" style="margin-top:var(--s-6)">
+            <h3>¿Querés centralBV para tu cuartel?</h3>
+            <p>Escribinos y coordinamos cómo ponerlo en marcha en tu guardia.</p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="mailto:hola@centralbv.example?subject=Quiero%20centralBV%20para%20mi%20cuartel">Escribinos</a>
+              <a class="btn btn--secondary" href="?demo=1">Probar la demo</a>
+            </div>
+          </div>
+        </div>
+        <div class="faq span-6 start-7">
+          <div class="faq__item"><h3>¿Hay que instalar algo?</h3><p>No. Es una app web: se abre en el navegador de la PC de la guardia o del celular.</p></div>
+          <div class="faq__item"><h3>¿Quién puede registrar una revisión?</h3><p>Cualquier usuario con sesión, desde la ficha del móvil.</p></div>
+          <div class="faq__item"><h3>¿Cómo se decide el estado de un móvil?</h3><p>Un ítem crítico lo deja fuera de servicio. Si no hay críticos, una atención lo deja con observaciones. Si todo está en Ok, queda operativo.</p></div>
+          <div class="faq__item"><h3>¿Qué pasa si salgo de una revisión sin guardar?</h3><p>La app te pregunta si querés descartarla. Lo que marcaste no se guarda.</p></div>
+          <div class="faq__item"><h3>¿Quién puede dar de baja un móvil?</h3><p>Solo el administrador general, desde la ficha. Agregar y editar móviles es del administrador de móviles.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" id="pie" aria-label="Pie de página">
+  <div class="wrap">
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="#top" aria-label="centralBV"><img src="assets/brand/logotipo.svg" alt="centralBV" height="40" style="height:40px;width:auto"></a>
+          <p class="footer__lede">Gestión para bomberos voluntarios.</p>
+        </div>
+        <div class="span-2 footer__col"><h4>Producto</h4><ul><li><a href="#moviles">Móviles</a></li><li><a href="#funciones">Inspecciones</a></li></ul></div>
+        <div class="span-2 footer__col"><h4>Guardia</h4><ul><li><a href="#constancias">Constancias</a></li></ul></div>
+        <div class="span-2 footer__col"><h4>Ayuda</h4><ul><li><a href="#preguntas">Preguntas</a></li><li><a href="#contacto">Contacto</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 centralBV</span>
+        <div class="socials"></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* these two loops keep their own rhythm: the motion layer must not restart them when the pointer enters */
+['pointerenter','focusin'].forEach(function (t) {
+  document.addEventListener(t, function (e) { if (e.target.closest && e.target.closest('[data-no-restart]')) e.stopPropagation(); }, true);
+});
+</script>
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+<script type="module" src="assets/diagrams/mount.js"></script>
+</body>
+</html>

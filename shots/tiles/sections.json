@@ -1,0 +1,114 @@
+{
+ "url": "http://127.0.0.1:5300/index.html",
+ "views": {
+  "desktop": {
+   "width": 1440,
+   "height": 900,
+   "navH": 72,
+   "scrollHeight": 4789,
+   "screens": 5.32,
+   "sections": [
+    {
+     "n": 1,
+     "tag": "section",
+     "id": "",
+     "cls": "hero hero--collage",
+     "top": 0,
+     "h": 900,
+     "hScreens": 1,
+     "offGrid": 0,
+     "tiles": [
+      {
+       "file": "desktop-sec-01-a.jpg",
+       "scrollY": 0
+      }
+     ]
+    },
+    {
+     "n": 2,
+     "tag": "section",
+     "id": "moviles",
+     "cls": "section",
+     "top": 900,
+     "h": 900,
+     "hScreens": 1,
+     "offGrid": 0,
+     "tiles": [
+      {
+       "file": "desktop-sec-02-a.jpg",
+       "scrollY": 900
+      }
+     ]
+    },
+    {
+     "n": 3,
+     "tag": "section",
+     "id": "constancias",
+     "cls": "section ground-inverse",
+     "top": 1800,
+     "h": 900,
+     "hScreens": 1,
+     "offGrid": 0,
+     "tiles": [
+      {
+       "file": "desktop-sec-03-a.jpg",
+       "scrollY": 1800
+      }
+     ]
+    },
+    {
+     "n": 4,
+     "tag": "section",
+     "id": "funciones",
+     "cls": "section",
+     "top": 2700,
+     "h": 900,
+     "hScreens": 1,
+     "offGrid": 0,
+     "tiles": [
+      {
+       "file": "desktop-sec-04-a.jpg",
+       "scrollY": 2700
+      }
+     ]
+    },
+    {
+     "n": 5,
+     "tag": "section",
+     "id": "preguntas",
+     "cls": "section",
+     "top": 3600,
+     "h": 900,
+     "hScreens": 1,
+     "offGrid": 0,
+     "tiles": [
+      {
+       "file": "desktop-sec-05-a.jpg",
+       "scrollY": 3600
+      }
+     ]
+    },
+    {
+     "n": 6,
+     "tag": "footer",
+     "id": "pie",
+     "cls": "footer",
+     "top": 4500,
+     "h": 289,
+     "hScreens": 0.32,
+     "offGrid": 289,
+     "tiles": [
+      {
+       "file": "desktop-sec-06-a.jpg",
+       "scrollY": 3889,
+       "cutTop": 611,
+       "height": 289
+      }
+     ]
+    }
+   ],
+   "consoleErrors": []
+  }
+ },
+ "at": "2026-11-07T14:38:33.725Z"
+}
